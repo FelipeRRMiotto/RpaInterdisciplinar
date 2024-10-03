@@ -1,33 +1,62 @@
+import os
 from datetime import datetime, timedelta, date
 import psycopg2 as pg
+import json
 
+with open(os.path.dirname(__file__)+"\\config\\config.json", 'r') as file:
+    configs = json.load(file)
+
+
+host_cloud = configs['host_cloud']
+porta = configs['porta']
+usuario = configs['usuario']
+senha = configs['senha']
+prod1 = configs['prod1']
+prod2 = configs['prod2']
+dev1 = configs['dev1']
+dev2 = configs['dev2']
+
+hoje = date.today()
+timestampa = str(hoje)+"_"+str(datetime.now().strftime('%Hh%Mm%Ss'))
 ontem = (datetime.now() - timedelta(1)).strftime('%Y-%m-%d')
 
-host_cloud = "pg-11d01e0e-testepgsql.e.aivencloud.com"
-porta = "24931"
-usuario = "avnadmin"
-senha = "AVNS_69W0O2_65jEqbsCuztW"
-prod1 = 'banco1_prod'
-prod2 = 'banco2_prod'
-dev1 = 'banco1_dev'
-dev2 = 'banco2_dev'
+caminho = os.path.dirname(__file__)+"\\logs\\log_"+timestampa+".txt"
+log = open(caminho,"a")
 
+def escrevelog(texto='',pref="",cond="P"):
+    if cond == "P":
+        log.write("\n"+pref+" - "+str(datetime.now().strftime('%H:%M:%S'))+" - "+str(texto))
+    elif cond == "E":
+        log.write("\n\n"+pref+" ERRO! - "+str(datetime.now().strftime('%H:%M:%S'))+str(texto))
+    elif cond == "S":
+        log.write("\n\n"+("="*30)+"\n\n")
+    elif cond == "L":
+        log.write("\n\n\n"+pref+" - "+str(datetime.now().strftime('%H:%M:%S'))+" - "+str(texto))
+
+log.write("Execução dia "+timestampa)
+escrevelog(cond="S")
 
 #O loop roda 2 vezes, a primeira no ambiente produtivo e a segunda no ambiente de dev
-for amb in range(0,2):
-    if amb == 0:
+for amb in ["prd","dev"]:
+    if amb == "prd":
         database1 = prod1
         database2 = prod2
 
+        escrevelog("Processo no banco prd",pref=amb)
         print("Começando processo banco prd")
     else:
         database1 = dev1
         database2 = dev2
+
+
+        escrevelog("Processo no banco dev",pref=amb)
         print("Começando processo banco dev")
 
     try:
         #criando conexões no banco
+        escrevelog("Conectando no banco do 1°",pref=amb)
         conn1 = pg.connect(host=host_cloud, database=database1, user=usuario, password=senha, port=porta)
+        escrevelog("Conectando no banco do 2°",pref=amb)
         conn2 = pg.connect(host=host_cloud, database=database2, user=usuario, password=senha, port=porta)
         cur1 = conn1.cursor()
         cur2 = conn2.cursor()
@@ -36,63 +65,102 @@ for amb in range(0,2):
         #Passando novos registros do banco do 1° para o banco do 2°
         #============================================================================================
 
+        escrevelog("Passando novos registros do banco do 1° para o banco do 2°",pref=amb, cond="L")
+
+
         # Obtendo dados da tabela tb_cor_mascote do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_cor_mascote",pref=amb, cond="L")
+        print(database1+"---->"+database2+" // Insert tb_cor_mascote")
+
         cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where createdAt = %s',(ontem,))
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(cores) > 0:
             #Inserindo todos os registros encontrados no banco do 2°
+            escrevelog("Inserindo registros", pref=amb)
+
             query = "INSERT INTO tb_cor_araci(pk_int_id_cor_araci, var_fundo, var_secundaria, var_primaria, deletedAt) values "
             for i in cores:
                 query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"',"+str(i[4])+"),"
-            query = (query[:-1]).replace("'None'","null")
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
             cur2.execute(query)
             conn2.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
 
         #===========================================================================================
 
         #Obtendo dados da tabela tb_evento do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_evento",pref=amb, cond="L")
+        print(database1+"---->"+database2+" // Insert tb_evento")
+
         cur1.execute('select dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat from tb_evento where createdAt = %s',(ontem,))
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(eventos) > 0:
             #Inserindo todos os registros encontrados no banco do 2°
+            escrevelog("Inserindo registros", pref=amb)
+
             query = "INSERT INTO tb_evento(dt_data_inicio, dt_data_final, var_nome, var_local, float_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat) values "
             for i in eventos:
                 query = query+"('"+str(i[0])+"','"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"',"+str(i[4])+","+str(i[5])+","+str(i[6])+","+str(i[7])+"),"
-            query = (query[:-1]).replace("'None'","null")
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
             cur2.execute(query)
             conn2.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
 
         # #===========================================================================================
 
         #Obtendo dados da tabela tb_barraca do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_barraca",pref=amb, cond="L")
+        print(database1+"---->"+database2+" // Insert tb_barraca")
+
         cur1.execute('select pk_int_id_barraca, var_nome, fk_int_id_evento, deletedat from tb_barraca where createdAt = %s',(ontem,))
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(barracas) > 0:
             #Inserindo todos os registros encontrados no banco do 2°
+            escrevelog("Inserindo registros", pref=amb)
+
             query = "INSERT INTO tb_barraca(pk_int_id_barraca, var_nome, fk_int_id_evento, deletedAt) values "
             for i in barracas:
                 query = query+"("+str(i[0])+",'"+str(i[1])+"',"+str(i[2])+","+str(i[3])+"),"
-            query = (query[:-1]).replace("'None'","null")
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
             cur2.execute(query)
             conn2.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
         
+        escrevelog(cond="S")
         #============================================================================================
         #Passando registros recentemente alterados do banco do 1° para o banco do 2°
         #============================================================================================
 
+        escrevelog("Passando registros alterados no banco do 1° para o banco do 2°",pref=amb)
+
+
         #Obtendo dados atualizados da tabela tb_cor_mascote do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_cor_mascote",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Update tb_cor_mascote")
+
+
         cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where tb_cor_mascote.updateat = %s order by pk_int_id_cor_mascote',(ontem,))
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(cores) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 2°",pref=amb)
+
             lista_cols = ["var_primaria","var_secundaria","var_fundo","deletedAt"]
             lista_mods = []
             querySelect = "select var_fundo, var_secundaria, var_primaria, deletedAt from tb_cor_araci where pk_int_id_cor_araci in ("
@@ -102,27 +170,37 @@ for amb in range(0,2):
             cur2.execute(querySelect)
             cores2 = cur2.fetchall()
 
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
             for i in range(0,len(cores2)):
                 for c in range(0,len(cores2[i])):
                     if cores2[i][c] != cores[i][c+1]:
                         lista_mods.append([lista_cols[c],cores[i][c+1],cores[i][0]])
             
+            escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
-                query = ("update tb_cor_araci set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_cor_araci = "+str(i[2])).replace("'None'","null")
+                query = (("update tb_cor_araci set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_cor_araci = "+str(i[2])).replace("'None'","null")).replace("None","null")
                 cur2.execute(query)
             conn2.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
         else:
-            print("Sem dados encontrados")
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
 
         #===========================================================================================
 
         # Obtendo dados atualizados da tabela tb_evento do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_evento",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Update evento")
+
+    
         cur1.execute('select pk_int_id_evento, dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where tb_evento.updateat = %s order by pk_int_id_evento',(ontem,))
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(eventos) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 2°",pref=amb)
+
+
             lista_cols = ["dt_data_inicio", "dt_data_final", "var_nome", "var_local", "float_preco_ticket", "deletedat", "fk_int_id_usuario"]
             lista_mods = []
             querySelect = "select dt_data_inicio, dt_data_final, var_nome, var_local, float_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where pk_int_id_evento in ("
@@ -132,6 +210,9 @@ for amb in range(0,2):
             cur2.execute(querySelect)
             eventos2 = cur2.fetchall()
 
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
             for i in range(0,len(eventos2)):
                 for c in range(0,len(eventos2[i])):
                     if eventos[i][c] != eventos[i][c+1]:
@@ -140,22 +221,30 @@ for amb in range(0,2):
                         else:
                             lista_mods.append([lista_cols[c],"'"+str(eventos[i][c+1])+"'",eventos[i][0]])
             
+            escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
-                query = ("update tb_evento set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_evento = "+str(i[2])).replace("'None'","null")
+                query = (("update tb_evento set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_evento = "+str(i[2])).replace("'None'","null")).replace("None","null")
                 cur2.execute(query)
             conn2.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
         else:
-            print("Sem dados encontrados")
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
 
         #===========================================================================================
 
         #Obtendo dados atualizados da tabela tb_barraca do banco do 1° e passando para o banco do 2°
+        escrevelog("Obtendo dados da tabela tb_barraca",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Update tb_barraca")
+
+
         cur1.execute('select pk_int_id_barraca, var_nome, deletedat, fk_int_id_evento from tb_barraca where updateat = %s order by pk_int_id_barraca',(ontem,))
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
         if len(barracas) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 2°",pref=amb)
+
+
             lista_cols = ["var_nome", "deletedat", "fk_int_id_evento"]
             lista_mods = []
             querySelect = "select var_nome, deletedat, fk_int_id_evento from tb_barraca where pk_int_id_barraca in ("
@@ -165,6 +254,9 @@ for amb in range(0,2):
             cur2.execute(querySelect)
             barracas2 = cur2.fetchall()
 
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
             for i in range(0,len(barracas2)):
                 for c in range(0,len(barracas2[i])):
                     if barracas[i][c] != barracas[i][c+1]:
@@ -173,22 +265,31 @@ for amb in range(0,2):
                         else:
                             lista_mods.append([lista_cols[c],"'"+str(barracas[i][c+1])+"'",barracas[i][0]])
             
+            escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
-                query = ("update tb_barraca set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_barraca = "+str(i[2])).replace("'None'","null")
+                query = (("update tb_barraca set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_barraca = "+str(i[2])).replace("'None'","null")).replace("None","null")
                 cur2.execute(query)
             conn2.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
         else:
-            print("Sem dados encontrados")
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
         
 
-    except (Exception, pg.Error) as error:
-        print("Erro ao obter dados do banco: ", error)
+    except (pg.Error) as error:
+        print("Erro banco: ", error)
+        escrevelog(error,pref=amb,cond="E")
+    except (Exception) as error:
+        print("Erro código python")
+        escrevelog(error,pref=amb,cond="E")
 
     finally:
         if conn1:
             cur1.close()
             conn1.close()
+            escrevelog("Conexão banco 1° encerrada",pref=amb,cond="L")
         if conn2:
             cur2.close()
             conn2.close()
-        print("Conexões encerradas")
+            escrevelog("Conexão banco 2° encerrada",pref=amb)
+        print("Conexões encerradas\n\n")
+        escrevelog(cond="S")
