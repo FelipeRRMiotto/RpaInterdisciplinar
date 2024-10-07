@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, date
 import psycopg2 as pg
 import json
 
-with open(os.path.dirname(__file__)+"\\config\\config.json", 'r') as file:
+with open(os.path.dirname(__file__)+"/config/config.json", 'r') as file:
     configs = json.load(file)
 
 
@@ -20,7 +20,7 @@ hoje = date.today()
 timestampa = str(hoje)+"_"+str(datetime.now().strftime('%Hh%Mm%Ss'))
 ontem = (datetime.now() - timedelta(1)).strftime('%Y-%m-%d')
 
-caminho = os.path.dirname(__file__)+"\\logs\\log_"+timestampa+".txt"
+caminho = os.path.dirname(__file__)+"/logs/log_"+timestampa+".txt"
 log = open(caminho,"a")
 
 def escrevelog(texto='',pref="",cond="P"):
