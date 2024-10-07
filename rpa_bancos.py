@@ -72,7 +72,7 @@ for amb in ["prd","dev"]:
         escrevelog("Obtendo dados da tabela tb_cor_mascote",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_cor_mascote")
 
-        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where createdAt = %s',(ontem,))
+        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where createdAt = current_date-1')
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -97,7 +97,7 @@ for amb in ["prd","dev"]:
         escrevelog("Obtendo dados da tabela tb_evento",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_evento")
 
-        cur1.execute('select dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat from tb_evento where createdAt = %s',(ontem,))
+        cur1.execute('select dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat from tb_evento where createdAt = current_date-1')
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -122,7 +122,7 @@ for amb in ["prd","dev"]:
         escrevelog("Obtendo dados da tabela tb_barraca",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_barraca")
 
-        cur1.execute('select pk_int_id_barraca, var_nome, fk_int_id_evento, deletedat from tb_barraca where createdAt = %s',(ontem,))
+        cur1.execute('select pk_int_id_barraca, var_nome, fk_int_id_evento, deletedat from tb_barraca where createdAt = current_date-1')
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -154,7 +154,7 @@ for amb in ["prd","dev"]:
         print(database1+"---->"+database2+" // Update tb_cor_mascote")
 
 
-        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where tb_cor_mascote.updateat = %s order by pk_int_id_cor_mascote',(ontem,))
+        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where tb_cor_mascote.updateat = current_date-1 order by pk_int_id_cor_mascote')
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -193,7 +193,7 @@ for amb in ["prd","dev"]:
         print(database1+"---->"+database2+" // Update evento")
 
     
-        cur1.execute('select pk_int_id_evento, dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where tb_evento.updateat = %s order by pk_int_id_evento',(ontem,))
+        cur1.execute('select pk_int_id_evento, dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where tb_evento.updateat = current_date-1 order by pk_int_id_evento')
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -237,7 +237,7 @@ for amb in ["prd","dev"]:
         print(database1+"---->"+database2+" // Update tb_barraca")
 
 
-        cur1.execute('select pk_int_id_barraca, var_nome, deletedat, fk_int_id_evento from tb_barraca where updateat = %s order by pk_int_id_barraca',(ontem,))
+        cur1.execute('select pk_int_id_barraca, var_nome, deletedat, fk_int_id_evento from tb_barraca where updateat = current_date-1 order by pk_int_id_barraca')
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -273,6 +273,65 @@ for amb in ["prd","dev"]:
             escrevelog("Alterações realizadas com sucesso",pref=amb)
         else:
             escrevelog("Nenhum dado alterado encontrado",pref=amb)
+
+        
+        #============================================================================================
+        #Passando novos registros do banco do 2° para o banco do 1°
+        #============================================================================================
+        # escrevelog(cond="S")
+        # escrevelog("Passando novos registros do banco do 2° para o banco do 1°",pref=amb, cond="L")
+
+
+        # # Obtendo dados da tabela tb_usuario do banco do 2° e passando para o banco do 1°
+        # escrevelog("Obtendo dados da tabela tb_usuario",pref=amb, cond="L")
+        # print(database2+"---->"+database1+" // Insert tb_usuario")
+
+        # cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt from tb_usuario where createdAt = current_date-1')
+        # usuarios = cur2.fetchall()
+
+        # #Verificando se algum novo registro foi encontrado
+        # if len(usuario) > 0:
+        #     #Inserindo todos os registros encontrados no banco do 1°
+        #     escrevelog("Inserindo registros", pref=amb)
+
+        #     query = "insert into tb_usuario(pk_int_id_usuario, text_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, createdAt) values "
+        #     for i in usuario:
+        #         query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"','"+str(i[4])+"','"+str(i[5])+"','"+str(i[6])+"','"+str(i[7])+"','"+str(i[8])+"','"+str(i[9])+"',current_date),"
+        #     query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+        #     cur1.execute(query)
+        #     conn1.commit()
+
+        #     escrevelog("Registros inseridos com sucesso", pref=amb)
+        # else:
+        #     escrevelog("Nenhum novo registro encontrado",pref=amb)
+
+        
+
+        # escrevelog("Passando novos registros do banco do 2° para o banco do 1°",pref=amb, cond="L")
+
+        # # Obtendo dados da tabela tb_mascote do banco do 2° e passando para o banco do 1°
+        # escrevelog("Obtendo dados da tabela tb_mascote",pref=amb, cond="L")
+        # print(database2+"---->"+database1+" // Insert tb_mascote")
+
+        # cur2.execute('select pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_araci, fk_int_id_usuario from tb_mascote where createdAt = current_date-1')
+        # mascotes = cur2.fetchall()
+
+        # #Verificando se algum novo registro foi encontrado
+        # if len(mascotes) > 0:
+        #     #Inserindo todos os registros encontrados no banco do 1°
+        #     escrevelog("Inserindo registros", pref=amb)
+
+        #     query = "insert into tb_mascote(pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_mascote, fk_int_id_usuario, createdAt) values "
+        #     for i in mascotes:
+        #         query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"',"+str(i[3])+","+str(i[4])+",current_date),"
+        #     query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+        #     cur1.execute(query)
+        #     conn1.commit()
+
+        #     escrevelog("Registros inseridos com sucesso", pref=amb)
+        # else:
+        #     escrevelog("Nenhum novo registro encontrado",pref=amb)
+
         
 
     except (pg.Error) as error:
