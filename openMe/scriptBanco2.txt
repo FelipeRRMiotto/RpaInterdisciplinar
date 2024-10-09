@@ -12,6 +12,7 @@ CREATE TABLE tb_usuario
  createdAt DATE,  
  deletedAt DATE,  
  fk_id_endereco INT,
+ updatedAt date,
  var_id_firebase varchar
 );
 
@@ -26,6 +27,7 @@ CREATE TABLE tb_venda_anuncio
  deletedAt DATE,  
  createdAt DATE,  
  fk_int_id_usuario INT,  
+ updatedAt date,
  fk_int_id_status_venda INT
 ); 
 
@@ -39,6 +41,7 @@ CREATE TABLE tb_endereco
  int_num_casa INT,  
  createdAt DATE,  
  deletedAt DATE,  
+ updatedAt date,
  fk_int_id_estado INT  
 ); 
 
@@ -49,6 +52,7 @@ CREATE TABLE tb_mascote
  deletedAt DATE,  
  var_nome VARCHAR,  
  fk_int_id_usuario INT,  
+ updatedAt date,
  fk_int_id_cor_araci INT  
 ); 
 
@@ -58,6 +62,7 @@ CREATE TABLE tb_follow
  fk_int_id_seguidor INT,  
  fk_int_id_seguido INT,  
  createdAt DATE,  
+ updatedAt date,
  deletedAt DATE  
 ); 
 
@@ -71,6 +76,7 @@ CREATE TABLE tb_evento
  deletedAt DATE,  
  pk_int_id_evento serial PRIMARY KEY,  
  dt_data_final DATE,  
+ updatedAt date,
  fk_int_id_usuario INT  
 ); 
 
@@ -81,6 +87,7 @@ CREATE TABLE tb_ticket
  createdAt DATE,  
  deletedAt DATE,  
  fk_int_id_usuario INT,  
+ updatedAt date,
  fk_int_id_evento INT  
 ); 
 
@@ -91,6 +98,7 @@ CREATE TABLE tb_venda_evento
  createdAt DATE,  
  deletedAt DATE,  
  fk_int_id_barraca INT,  
+ updatedAt date,
  fk_int_id_usuario INT  
 ); 
 
@@ -100,6 +108,7 @@ CREATE TABLE tb_barraca
  var_nome VARCHAR,  
  int_num_tickets INT,  
  createdAt DATE,  
+ updatedAt date,
  deletedAt DATE,  
  fk_int_id_evento INT  
 ); 
@@ -109,6 +118,7 @@ CREATE TABLE tb_estado
  pk_int_id_estado serial PRIMARY KEY,  
  var_estado VARCHAR,
  createdAt DATE,  
+ updatedAt date,
  deletedAt DATE
 ); 
 
@@ -117,6 +127,7 @@ CREATE TABLE tb_status_venda
  pk_int_id_status_venda serial PRIMARY KEY,  
  var_status_venda VARCHAR,
  createdAt DATE,  
+ updatedAt date,
  deletedAt DATE
 ); 
 
@@ -126,6 +137,7 @@ CREATE TABLE tb_cor_araci
  var_primaria VARCHAR,  
  var_secundaria VARCHAR,  
  var_fundo VARCHAR,
+ updatedAt date,
  createdAt DATE,  
  deletedAt DATE
 ); 
@@ -1105,6 +1117,188 @@ CREATE TRIGGER tr_log_delete_venda_evento
   FOR EACH ROW
   EXECUTE PROCEDURE trf_log_delete_venda_evento();
 ;
+
+CREATE or replace FUNCTION trf_updatedat_tb_barraca()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_barraca
+before UPDATE ON tb_barraca
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_barraca();
+
+
+CREATE or replace FUNCTION trf_updatedat_tb_cor_araci()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_cor_araci
+before UPDATE ON tb_cor_araci
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_cor_araci();
+
+CREATE or replace FUNCTION trf_updatedat_tb_endereco()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_endereco
+before UPDATE ON tb_endereco
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_endereco();
+
+CREATE or replace FUNCTION trf_updatedat_tb_estado()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_estado
+before UPDATE ON tb_estado
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_estado();
+
+CREATE or replace FUNCTION trf_updatedat_tb_evento()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_evento
+before UPDATE ON tb_evento
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_evento();
+
+CREATE or replace FUNCTION trf_updatedat_tb_follow()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_follow
+before UPDATE ON tb_follow
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_follow();
+
+CREATE or replace FUNCTION trf_updatedat_tb_mascote()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_mascote
+before UPDATE ON tb_mascote
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_mascote();
+
+CREATE or replace FUNCTION trf_updatedat_tb_status_venda()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_status_venda
+before UPDATE ON tb_status_venda
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_status_venda();
+
+CREATE or replace FUNCTION trf_updatedat_tb_ticket()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_ticket
+before UPDATE ON tb_ticket
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_ticket();
+
+CREATE or replace FUNCTION trf_updatedat_tb_usuario()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_usuario
+before UPDATE ON tb_usuario
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_usuario();
+
+CREATE or replace FUNCTION trf_updatedat_tb_venda_anuncio()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_venda_anuncio
+before UPDATE ON tb_venda_anuncio
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_venda_anuncio();
+
+
+CREATE or replace FUNCTION trf_updatedat_tb_venda_evento()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  new.updatedAt = current_date;
+RETURN new;
+END
+$$;
+
+CREATE TRIGGER tr_updatedat_tb_venda_evento
+before UPDATE ON tb_venda_evento
+FOR EACH ROW
+EXECUTE PROCEDURE trf_updatedat_tb_venda_evento();
 
 create or replace procedure pr_venda_evento(usuario int, evento int, barraca int, qtd int)
 language plpgsql    

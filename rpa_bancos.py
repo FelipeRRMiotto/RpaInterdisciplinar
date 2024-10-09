@@ -278,59 +278,194 @@ for amb in ["prd","dev"]:
         #============================================================================================
         #Passando novos registros do banco do 2° para o banco do 1°
         #============================================================================================
-        # escrevelog(cond="S")
-        # escrevelog("Passando novos registros do banco do 2° para o banco do 1°",pref=amb, cond="L")
+        escrevelog(cond="S")
+        escrevelog("Passando novos registros do banco do 2° para o banco do 1°",pref=amb, cond="L")
+
+        # Obtendo dados da tabela tb_endereco do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_endereco",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_endereco")
+
+        cur2.execute('select e.pk_int_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.createdAt = current_date-1 and fk_int_id_estado = pk_int_id_estado')
+        enderecos = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(enderecos) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
+
+            query = "insert into tb_endereco(pk_int_id_endereco, var_cep, var_estado, var_rua, var_cidade, var_complemento, int_num_casa, deletedat, createdat) values "
+            for i in enderecos:
+                query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"','"+str(i[4])+"','"+str(i[5])+"',"+str(i[6])+",'"+str(i[7])+"',current_date),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
 
 
-        # # Obtendo dados da tabela tb_usuario do banco do 2° e passando para o banco do 1°
-        # escrevelog("Obtendo dados da tabela tb_usuario",pref=amb, cond="L")
-        # print(database2+"---->"+database1+" // Insert tb_usuario")
+        #===========================================================================================
 
-        # cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt from tb_usuario where createdAt = current_date-1')
-        # usuarios = cur2.fetchall()
 
-        # #Verificando se algum novo registro foi encontrado
-        # if len(usuario) > 0:
-        #     #Inserindo todos os registros encontrados no banco do 1°
-        #     escrevelog("Inserindo registros", pref=amb)
+        # Obtendo dados da tabela tb_usuario do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_usuario",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_usuario")
 
-        #     query = "insert into tb_usuario(pk_int_id_usuario, text_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, createdAt) values "
-        #     for i in usuario:
-        #         query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"','"+str(i[4])+"','"+str(i[5])+"','"+str(i[6])+"','"+str(i[7])+"','"+str(i[8])+"','"+str(i[9])+"',current_date),"
-        #     query = ((query[:-1]).replace("'None'","null")).replace("None","null")
-        #     cur1.execute(query)
-        #     conn1.commit()
+        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where createdAt = current_date-1')
+        usuarios = cur2.fetchall()
 
-        #     escrevelog("Registros inseridos com sucesso", pref=amb)
-        # else:
-        #     escrevelog("Nenhum novo registro encontrado",pref=amb)
+        #Verificando se algum novo registro foi encontrado
+        if len(usuario) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
 
+            query = "insert into tb_usuario(pk_int_id_usuario, text_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_int_id_endereco, createdAt) values "
+            for i in usuario:
+                query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"','"+str(i[4])+"','"+str(i[5])+"','"+str(i[6])+"','"+str(i[7])+"','"+str(i[8])+"','"+str(i[9])+"','"+str(i[10])+"',current_date),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
         
 
-        # escrevelog("Passando novos registros do banco do 2° para o banco do 1°",pref=amb, cond="L")
+        #===========================================================================================
+        
 
-        # # Obtendo dados da tabela tb_mascote do banco do 2° e passando para o banco do 1°
-        # escrevelog("Obtendo dados da tabela tb_mascote",pref=amb, cond="L")
-        # print(database2+"---->"+database1+" // Insert tb_mascote")
+        # Obtendo dados da tabela tb_mascote do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_mascote",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_mascote")
 
-        # cur2.execute('select pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_araci, fk_int_id_usuario from tb_mascote where createdAt = current_date-1')
-        # mascotes = cur2.fetchall()
+        cur2.execute('select pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_araci, fk_int_id_usuario from tb_mascote where createdAt = current_date-1')
+        mascotes = cur2.fetchall()
 
-        # #Verificando se algum novo registro foi encontrado
-        # if len(mascotes) > 0:
-        #     #Inserindo todos os registros encontrados no banco do 1°
-        #     escrevelog("Inserindo registros", pref=amb)
+        #Verificando se algum novo registro foi encontrado
+        if len(mascotes) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
 
-        #     query = "insert into tb_mascote(pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_mascote, fk_int_id_usuario, createdAt) values "
-        #     for i in mascotes:
-        #         query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"',"+str(i[3])+","+str(i[4])+",current_date),"
-        #     query = ((query[:-1]).replace("'None'","null")).replace("None","null")
-        #     cur1.execute(query)
-        #     conn1.commit()
+            query = "insert into tb_mascote(pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_mascote, fk_int_id_usuario, createdAt) values "
+            for i in mascotes:
+                query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"',"+str(i[3])+","+str(i[4])+",current_date),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
 
-        #     escrevelog("Registros inseridos com sucesso", pref=amb)
-        # else:
-        #     escrevelog("Nenhum novo registro encontrado",pref=amb)
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
+
+
+        #===========================================================================================
+        
+
+        # Obtendo dados da tabela tb_venda_anuncio do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_venda_anuncio",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_venda_anuncio")
+
+        cur2.execute('select a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, a.pk_int_id_venda_anuncio, s.var_status_venda, a.deletedAt, a.createdAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.createdat = current_date-1')
+        anuncios = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(anuncios) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
+
+            query = "insert into tb_anuncio(var_nota_fiscal, dt_data, num_valor, var_produto, int_quantidade, pk_int_id_anuncio, var_status_venda, deletedAt, createdAt, fk_int_id_usuario) values "
+            for i in anuncios:
+                query = query+"('"+str(i[0])+"','"+str(i[1])+"',"+str(i[2])+",'"+str(i[3])+"',"+str(i[4])+","+str(i[5])+",'"+str(i[6])+"','"+str(i[7])+"',current_date"+","+str(i[9])+"),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
+        
+        
+        #===========================================================================================
+        
+
+        # Obtendo dados da tabela tb_follow do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_follow",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_follow")
+
+        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedAt, createdAt from tb_follow where createdat = current_date-1')
+        follows = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(follows) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
+
+            query = "insert into tb_follow(pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguindo, deleteat, createdat, dt_data) values "
+            for i in follows:
+                query = query+"("+str(i[0])+","+str(i[1])+","+str(i[2])+",'"+str(i[3])+"',current_date,'"+str(i[4])+"'),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
+
+    
+    #===========================================================================================
+        
+
+        # Obtendo dados da tabela tb_ticket do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_ticket",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_ticket")
+
+        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where createdAt = current_date-1')
+        ticket = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(ticket) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
+
+            query = "insert into tb_ticket(pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat, createdat) values "
+            for i in ticket:
+                query = query+"("+str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+",'"+str(i[4])+"',current_date),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
+
+
+    #===========================================================================================
+        
+
+        # Obtendo dados da tabela tb_venda_evento do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_venda_evento",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Insert tb_venda_evento")
+
+        cur2.execute('select pk_int_id_venda, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat from tb_venda_evento where createdAt = current_date-1')
+        vendas_evento = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(vendas_evento) > 0:
+            #Inserindo todos os registros encontrados no banco do 1°
+            escrevelog("Inserindo registros", pref=amb)
+
+            query = "insert into tb_venda_evento(pk_int_id_venda, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat) values "
+            for i in vendas_evento:
+                query = query+"("+str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+",'"+str(i[4])+"',current_date),"
+            query = ((query[:-1]).replace("'None'","null")).replace("None","null")
+            cur1.execute(query)
+            conn1.commit()
+
+            escrevelog("Registros inseridos com sucesso", pref=amb)
+        else:
+            escrevelog("Nenhum novo registro encontrado",pref=amb)
+        
 
         
 
