@@ -52,7 +52,7 @@ else:
 escrevelog(cond="S")
 
 #O loop roda 2 vezes, a primeira no ambiente produtivo e a segunda no ambiente de dev
-for amb in ["prd","dev"]:
+for amb in ambs:
     if amb == "prd":
         database1 = prod1
         database2 = prod2
@@ -462,7 +462,7 @@ for amb in ["prd","dev"]:
         escrevelog("Obtendo dados da tabela tb_venda_evento",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_venda_evento")
 
-        cur2.execute('select pk_int_id_venda, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat from tb_venda_evento where createdAt = current_date-1')
+        cur2.execute('select pk_int_id_venda_evento, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat from tb_venda_evento where createdAt = current_date-1')
         vendas_evento = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -470,7 +470,7 @@ for amb in ["prd","dev"]:
             #Inserindo todos os registros encontrados no banco do 1°
             escrevelog("Inserindo registros", pref=amb)
 
-            query = "insert into tb_venda_evento(pk_int_id_venda, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat) values "
+            query = "insert into tb_venda_evento(pk_int_id_venda_evento, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat) values "
             for i in vendas_evento:
                 query = query+"("+str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+",'"+str(i[4])+"',current_date),"
             query = ((query[:-1]).replace("'None'","null")).replace("None","null")
