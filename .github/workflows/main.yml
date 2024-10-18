@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: EC2 salaH
+    - name: Sobe do github para a aws
       run: |
             echo "${{secrets.AWS_RPA_INTER}}" >private_key && chmod 600 private_key
             ssh -o StrictHostKeyChecking=no -i private_key ubuntu@ec2-35-172-89-76.compute-1.amazonaws.com "
