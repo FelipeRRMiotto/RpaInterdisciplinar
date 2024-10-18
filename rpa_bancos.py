@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, date
-import psycopg2 as pg
+import psycopg as pg
 import json
 
 #Lendo arquivo de config
