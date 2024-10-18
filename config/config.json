@@ -6,5 +6,7 @@
     "prod1" : "banco1_prod",
     "prod2" : "banco2_prod",
     "dev1" : "banco1_dev",
-    "dev2" : "banco2_dev"
+    "dev2" : "banco2_dev",
+    "rodaPrd" : "N",
+    "rodaDev" : "S"
     }

@@ -3,10 +3,11 @@ from datetime import datetime, timedelta, date
 import psycopg2 as pg
 import json
 
+#Lendo arquivo de config
 with open(os.path.dirname(__file__)+"/config/config.json", 'r') as file:
     configs = json.load(file)
 
-
+#Atribuindo configurações e setando variaveis
 host_cloud = configs['host_cloud']
 porta = configs['porta']
 usuario = configs['usuario']
@@ -20,9 +21,11 @@ hoje = date.today()
 timestampa = str(hoje)+"_"+str(datetime.now().strftime('%Hh%Mm%Ss'))
 ontem = (datetime.now() - timedelta(1)).strftime('%Y-%m-%d')
 
+#Criando e abrindo arquivo de log
 caminho = os.path.dirname(__file__)+"/logs/log_"+timestampa+".txt"
 log = open(caminho,"a")
 
+#Criando função para escrever log
 def escrevelog(texto='',pref="",cond="P"):
     if cond == "P":
         log.write("\n"+pref+" - "+str(datetime.now().strftime('%H:%M:%S'))+" - "+str(texto))
@@ -34,6 +37,22 @@ def escrevelog(texto='',pref="",cond="P"):
         log.write("\n\n\n"+pref+" - "+str(datetime.now().strftime('%H:%M:%S'))+" - "+str(texto))
 
 log.write("Execução dia "+timestampa)
+
+#Lendo em quais ambientes o programa será executado
+if configs['rodaPrd'] == "S" and configs['rodaDev'] == "S":
+    ambs = ["prd","dev"]
+    escrevelog("Executando nos ambientes de DEV e PRD")
+elif configs['rodaPrd'] != "S" and configs['rodaDev'] == "S":
+    ambs = ["dev"]
+    escrevelog("Executando no ambiente de DEV")
+elif configs['rodaPrd'] == "S" and configs['rodaDev'] != "S":
+    ambs = ["prd"]
+    escrevelog("Executando no ambiente de PRD")
+else:
+    escrevelog("Está escrito no arquivo de config que nenhum ambiente será executado.")
+    escrevelog("Encerrando programa")
+    quit()
+
 escrevelog(cond="S")
 
 #O loop roda 2 vezes, a primeira no ambiente produtivo e a segunda no ambiente de dev
@@ -175,7 +194,7 @@ for amb in ["prd","dev"]:
             for i in range(0,len(cores2)):
                 for c in range(0,len(cores2[i])):
                     if cores2[i][c] != cores[i][c+1]:
-                        lista_mods.append([lista_cols[c],cores[i][c+1],cores[i][0]])
+                        lista_mods.append([lista_cols[c],cores[i][c+1],cores2[i][0]])
             
             escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
@@ -215,11 +234,11 @@ for amb in ["prd","dev"]:
 
             for i in range(0,len(eventos2)):
                 for c in range(0,len(eventos2[i])):
-                    if eventos[i][c] != eventos[i][c+1]:
+                    if eventos2[i][c] != eventos[i][c+1]:
                         if c in [4,6]:
-                            lista_mods.append([lista_cols[c],eventos[i][c+1],eventos[i][0]])
+                            lista_mods.append([lista_cols[c],eventos[i][c+1],eventos2[i][0]])
                         else:
-                            lista_mods.append([lista_cols[c],"'"+str(eventos[i][c+1])+"'",eventos[i][0]])
+                            lista_mods.append([lista_cols[c],"'"+str(eventos[i][c+1])+"'",eventos2[i][0]])
             
             escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
@@ -259,11 +278,11 @@ for amb in ["prd","dev"]:
 
             for i in range(0,len(barracas2)):
                 for c in range(0,len(barracas2[i])):
-                    if barracas[i][c] != barracas[i][c+1]:
+                    if barracas2[i][c] != barracas[i][c+1]:
                         if c == 2:
-                            lista_mods.append([lista_cols[c],barracas[i][c+1],barracas[i][0]])
+                            lista_mods.append([lista_cols[c],barracas[i][c+1],barracas2[i][0]])
                         else:
-                            lista_mods.append([lista_cols[c],"'"+str(barracas[i][c+1])+"'",barracas[i][0]])
+                            lista_mods.append([lista_cols[c],"'"+str(barracas[i][c+1])+"'",barracas2[i][0]])
             
             escrevelog("Realizando alterações",pref=amb)
             for i in lista_mods:
@@ -285,7 +304,7 @@ for amb in ["prd","dev"]:
         escrevelog("Obtendo dados da tabela tb_endereco",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_endereco")
 
-        cur2.execute('select e.pk_int_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.createdAt = current_date-1 and fk_int_id_estado = pk_int_id_estado')
+        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.createdAt = current_date-1 and fk_int_id_estado = pk_int_id_estado')
         enderecos = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -465,9 +484,321 @@ for amb in ["prd","dev"]:
             escrevelog("Registros inseridos com sucesso", pref=amb)
         else:
             escrevelog("Nenhum novo registro encontrado",pref=amb)
-        
+    
+
+    #============================================================================================
+    #Passando registros recentemente alterados do banco do 2° para o banco do 1°
+    #============================================================================================
+        escrevelog(cond="S")
+        escrevelog("Passando registros alterados no banco do 1° para o banco do 2°",pref=amb)
+
+
+        #Obtendo dados atualizados da tabela tb_endereco do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_endereco",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_endereco")
+
+
+        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.updatedAt = current_date-1 and fk_int_id_estado = pk_int_id_estado order by e.pk_int_id_endereco')
+        enderecos2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(enderecos2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["var_cep", "var_estado", "var_rua", "var_cidade", "var_complemento", "int_num_casa", "deletedat"]
+            lista_mods = []
+            querySelect = "select var_cep, var_estado, var_rua, var_cidade, var_complemento, int_num_casa, deletedat from tb_endereco where pk_int_id_endereco in ("
+            for i in enderecos2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_endereco"
+            cur1.execute(querySelect)
+            enderecos = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(enderecos)):
+                for c in range(0,len(enderecos[i])):
+                    if enderecos[i][c] != enderecos2[i][c+1]:
+                        if c == 5:
+                            lista_mods.append([lista_cols[c],enderecos2[i][c+1],enderecos[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(enderecos2[i][c+1])+"'",enderecos[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_endereco set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_endereco = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+
+
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_usuario do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_usuario",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_usuario")
+
+
+        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where updatedat = current_date-1 order by pk_int_id_usuario')
+        usuarios2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(usuarios2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["text_foto", "var_email", "var_senha", "var_user_name", "dt_nascimento", "var_descricao_usuario", "var_cpf", "var_nome", "deletedAt", "fk_id_endereco"]
+            lista_mods = []
+            querySelect = "select text_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where pk_int_id_usuario in ("
+            for i in usuarios2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_usuario"
+            cur1.execute(querySelect)
+            usuarios = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(usuarios)):
+                for c in range(0,len(usuarios[i])):
+                    if usuarios[i][c] != usuarios2[i][c+1]:
+                        if c == 9:
+                            lista_mods.append([lista_cols[c],usuarios2[i][c+1],usuarios[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(usuarios2[i][c+1])+"'",usuarios[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_usuario set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_usuario = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
 
         
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_venda_anuncio do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_venda_anuncio",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_venda_anuncio")
+
+
+        cur2.execute('select a.pk_int_id_venda_anuncio, a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, s.var_status_venda, a.deletedAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.updatedat = current_date-1 order by a.pk_int_id_venda_anuncio')
+        anuncios2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(anuncios2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["var_nota_fiscal", "dt_data", "num_valor", "var_produto", "int_quantidade", "var_status_venda", "deletedAt", "fk_int_id_usuario"]
+            lista_mods = []
+            querySelect = "select var_nota_fiscal, dt_data, num_valor, var_produto, int_quantidade, var_status_venda, deletedAt, fk_int_id_usuario from tb_anuncio where pk_int_id_anuncio in ("
+            for i in anuncios2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_anuncio"
+            cur1.execute(querySelect)
+            anuncios = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(anuncios)):
+                for c in range(0,len(anuncios[i])):
+                    if anuncios[i][c] != anuncios2[i][c+1]:
+                        if c in [2,4,7]:
+                            lista_mods.append([lista_cols[c],anuncios2[i][c+1],anuncios[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(anuncios2[i][c+1])+"'",anuncios[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_anuncio set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_anuncio = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+        
+
+
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_mascote do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_mascote",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_mascote")
+
+
+        cur2.execute('select pk_int_id_mascote, fk_int_id_cor_araci, fk_int_id_usuario, var_nome, deletedat from tb_mascote where updatedat = current_date-1 order by pk_int_id_mascote')
+        mascotes2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(mascotes2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["fk_int_id_cor_mascote", "fk_int_id_usuario", "var_nome", "deletedAt"]
+            lista_mods = []
+            querySelect = "select fk_int_id_cor_mascote, fk_int_id_usuario, var_nome, deletedAt from tb_mascote where pk_int_id_mascote in ("
+            for i in mascotes2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_mascote"
+            cur1.execute(querySelect)
+            mascotes = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(mascotes)):
+                for c in range(0,len(mascotes[i])):
+                    if mascotes[i][c] != mascotes2[i][c+1]:
+                        if c in [0,1]:
+                            lista_mods.append([lista_cols[c],mascotes2[i][c+1],mascotes[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(mascotes2[i][c+1])+"'",mascotes[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_mascote set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_mascote = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+        
+
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_follow do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_follow",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_follow")
+
+
+        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedat from tb_follow where updatedat = current_date-1 order by pk_int_id_follow')
+        follows2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(follows2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["fk_int_id_seguidor", "fk_int_id_seguindo", "deletedAt"]
+            lista_mods = []
+            querySelect = "select fk_int_id_seguidor, fk_int_id_seguindo, deletedAt from tb_follow where pk_int_id_follow in ("
+            for i in follows2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_follow"
+            cur1.execute(querySelect)
+            follows = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(follows)):
+                for c in range(0,len(follows[i])):
+                    if follows[i][c] != follows2[i][c+1]:
+                        if c in [0,1]:
+                            lista_mods.append([lista_cols[c],follows2[i][c+1],follows[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(follows2[i][c+1])+"'",follows[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_follow set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_follow = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+
+        
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_ticket do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_ticket",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_ticket")
+
+
+        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where updatedat = current_date-1 order by pk_int_id_ticket')
+        tickets2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(tickets2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["fk_int_id_usuario", "fk_int_id_evento", "int_quant", "deletedAt"]
+            lista_mods = []
+            querySelect = "select fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where pk_int_id_ticket in ("
+            for i in tickets2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_ticket"
+            cur1.execute(querySelect)
+            tickets = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(tickets)):
+                for c in range(0,len(tickets[i])):
+                    if tickets[i][c] != tickets2[i][c+1]:
+                        if c in [0,1,2]:
+                            lista_mods.append([lista_cols[c],tickets2[i][c+1],tickets[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(tickets2[i][c+1])+"'",tickets[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_ticket set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_ticket = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+
+
+        #===========================================================================================
+
+
+        #Obtendo dados atualizados da tabela tb_venda_evento do banco do 2° e passando para o banco do 1°
+        escrevelog("Obtendo dados da tabela tb_venda_evento",pref=amb, cond="L")
+        print(database2+"---->"+database1+" // Update tb_venda_evento")
+
+
+        cur2.execute('select pk_int_id_venda_evento, fk_int_id_barraca, fk_int_id_usuario, num_valor, deletedat from tb_venda_evento where updatedat = current_date-1 order by pk_int_id_venda_evento')
+        vendas_evento2 = cur2.fetchall()
+
+        #Verificando se algum novo registro foi encontrado
+        if len(vendas_evento2) > 0:
+            escrevelog("Obtendo os registros equivalentes do banco do 1°",pref=amb)
+
+            lista_cols = ["fk_int_id_barraca", "fk_int_id_usuario", "num_valor", "deletedAt"]
+            lista_mods = []
+            querySelect = "fk_int_id_barraca, fk_int_id_usuario, num_valor, deletedat where pk_int_id_venda_evento in ("
+            for i in vendas_evento2:
+                querySelect = querySelect+str(i[0])+","
+            querySelect = (querySelect[:-1])+") order by pk_int_id_venda_evento"
+            cur1.execute(querySelect)
+            vendas_evento = cur1.fetchall()
+
+            escrevelog("Comparando Registros e salvando alterações a serem feitas",pref=amb)
+
+            for i in range(0,len(vendas_evento)):
+                for c in range(0,len(vendas_evento[i])):
+                    if vendas_evento[i][c] != vendas_evento2[i][c+1]:
+                        if c in [0,1,2]:
+                            lista_mods.append([lista_cols[c],vendas_evento2[i][c+1],vendas_evento[i][0]])
+                        else:
+                            lista_mods.append([lista_cols[c],"'"+str(vendas_evento2[i][c+1])+"'",vendas_evento[i][0]])
+            
+            escrevelog("Realizando alterações",pref=amb)
+            for i in lista_mods:
+                query = (("update tb_venda_evento set "+str(i[0])+" = "+str(i[1])+" where pk_int_id_venda_evento = "+str(i[2])).replace("'None'","null")).replace("None","null")
+                cur1.execute(query)
+            conn1.commit()
+            escrevelog("Alterações realizadas com sucesso",pref=amb)
+        else:
+            escrevelog("Nenhum dado alterado encontrado",pref=amb)
+
+
 
     except (pg.Error) as error:
         print("Erro banco: ", error)
