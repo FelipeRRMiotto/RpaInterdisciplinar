@@ -23,7 +23,7 @@ ontem = (datetime.now() - timedelta(1)).strftime('%Y-%m-%d')
 
 #Criando e abrindo arquivo de log
 caminho = os.path.dirname(__file__)+"/logs/log_"+timestampa+".txt"
-log = open(caminho,"a")
+log = open(caminho,"x")
 
 #Criando função para escrever log
 def escrevelog(texto='',pref="",cond="P"):
