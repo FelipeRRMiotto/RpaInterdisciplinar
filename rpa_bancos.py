@@ -8,10 +8,6 @@ with open(os.path.dirname(__file__)+"/config/config.json", 'r') as file:
     configs = json.load(file)
 
 #Atribuindo configurações e setando variaveis
-host_cloud = configs['host_cloud']
-porta = configs['porta']
-usuario = configs['usuario']
-senha = configs['senha']
 prod1 = configs['prod1']
 prod2 = configs['prod2']
 dev1 = configs['dev1']
@@ -74,9 +70,9 @@ for amb in ["prd","dev"]:
     try:
         #criando conexões no banco
         escrevelog("Conectando no banco do 1°",pref=amb)
-        conn1 = pg.connect(host=host_cloud, database=database1, user=usuario, password=senha, port=porta)
+        conn1 = pg.connect(database1)
         escrevelog("Conectando no banco do 2°",pref=amb)
-        conn2 = pg.connect(host=host_cloud, database=database2, user=usuario, password=senha, port=porta)
+        conn2 = pg.connect(database2)
         cur1 = conn1.cursor()
         cur2 = conn2.cursor()
 
@@ -335,12 +331,12 @@ for amb in ["prd","dev"]:
         usuarios = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
-        if len(usuario) > 0:
+        if len(usuarios) > 0:
             #Inserindo todos os registros encontrados no banco do 1°
             escrevelog("Inserindo registros", pref=amb)
 
             query = "insert into tb_usuario(pk_int_id_usuario, text_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_int_id_endereco, createdAt) values "
-            for i in usuario:
+            for i in usuarios:
                 query = query+"("+str(i[0])+",'"+str(i[1])+"','"+str(i[2])+"','"+str(i[3])+"','"+str(i[4])+"','"+str(i[5])+"','"+str(i[6])+"','"+str(i[7])+"','"+str(i[8])+"','"+str(i[9])+"','"+str(i[10])+"',current_date),"
             query = ((query[:-1]).replace("'None'","null")).replace("None","null")
             cur1.execute(query)
