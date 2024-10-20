@@ -87,7 +87,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_cor_mascote",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_cor_mascote")
 
-        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where createdAt = current_date-1')
+        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where createdAt = current_date-2')
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -112,7 +112,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_evento",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_evento")
 
-        cur1.execute('select dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat from tb_evento where createdAt = current_date-1')
+        cur1.execute('select dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, pk_int_id_evento, fk_int_id_usuario, deletedat from tb_evento where createdAt = current_date-2')
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -137,7 +137,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_barraca",pref=amb, cond="L")
         print(database1+"---->"+database2+" // Insert tb_barraca")
 
-        cur1.execute('select pk_int_id_barraca, var_nome, fk_int_id_evento, deletedat from tb_barraca where createdAt = current_date-1')
+        cur1.execute('select pk_int_id_barraca, var_nome, fk_int_id_evento, deletedat from tb_barraca where createdAt = current_date-2')
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -169,7 +169,7 @@ for amb in ambs:
         print(database1+"---->"+database2+" // Update tb_cor_mascote")
 
 
-        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where tb_cor_mascote.updateat = current_date-1 order by pk_int_id_cor_mascote')
+        cur1.execute('select pk_int_id_cor_mascote, text_fundo, text_secundaria, text_primaria, deletedAt from tb_cor_mascote where tb_cor_mascote.updateat = current_date-2 order by pk_int_id_cor_mascote')
         cores = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -208,7 +208,7 @@ for amb in ambs:
         print(database1+"---->"+database2+" // Update evento")
 
     
-        cur1.execute('select pk_int_id_evento, dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where tb_evento.updateat = current_date-1 order by pk_int_id_evento')
+        cur1.execute('select pk_int_id_evento, dt_inicio, dt_final, var_nome, var_local, num_preco_ticket, deletedat, fk_int_id_usuario from tb_evento where tb_evento.updateat = current_date-2 order by pk_int_id_evento')
         eventos = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -252,7 +252,7 @@ for amb in ambs:
         print(database1+"---->"+database2+" // Update tb_barraca")
 
 
-        cur1.execute('select pk_int_id_barraca, var_nome, deletedat, fk_int_id_evento from tb_barraca where updateat = current_date-1 order by pk_int_id_barraca')
+        cur1.execute('select pk_int_id_barraca, var_nome, deletedat, fk_int_id_evento from tb_barraca where updateat = current_date-2 order by pk_int_id_barraca')
         barracas = cur1.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -300,7 +300,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_endereco",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_endereco")
 
-        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.createdAt = current_date-1 and fk_int_id_estado = pk_int_id_estado')
+        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.createdAt = current_date-2 and fk_int_id_estado = pk_int_id_estado')
         enderecos = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -327,7 +327,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_usuario",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_usuario")
 
-        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where createdAt = current_date-1')
+        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where createdAt = current_date-2')
         usuarios = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -354,7 +354,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_mascote",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_mascote")
 
-        cur2.execute('select pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_araci, fk_int_id_usuario from tb_mascote where createdAt = current_date-1')
+        cur2.execute('select pk_int_id_mascote, var_nome, deletedAt, fk_int_id_cor_araci, fk_int_id_usuario from tb_mascote where createdAt = current_date-2')
         mascotes = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -381,7 +381,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_venda_anuncio",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_venda_anuncio")
 
-        cur2.execute('select a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, a.pk_int_id_venda_anuncio, s.var_status_venda, a.deletedAt, a.createdAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.createdat = current_date-1')
+        cur2.execute('select a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, a.pk_int_id_venda_anuncio, s.var_status_venda, a.deletedAt, a.createdAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.createdat = current_date-2')
         anuncios = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -408,7 +408,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_follow",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_follow")
 
-        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedAt, createdAt from tb_follow where createdat = current_date-1')
+        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedAt, createdAt from tb_follow where createdat = current_date-2')
         follows = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -435,7 +435,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_ticket",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_ticket")
 
-        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where createdAt = current_date-1')
+        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where createdAt = current_date-2')
         ticket = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -462,7 +462,7 @@ for amb in ambs:
         escrevelog("Obtendo dados da tabela tb_venda_evento",pref=amb, cond="L")
         print(database2+"---->"+database1+" // Insert tb_venda_evento")
 
-        cur2.execute('select pk_int_id_venda_evento, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat from tb_venda_evento where createdAt = current_date-1')
+        cur2.execute('select pk_int_id_venda_evento, fk_int_id_usuario, fk_int_id_barraca, num_valor, deletedat, createdat from tb_venda_evento where createdAt = current_date-2')
         vendas_evento = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -494,7 +494,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_endereco")
 
 
-        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.updatedAt = current_date-1 and fk_int_id_estado = pk_int_id_estado order by e.pk_int_id_endereco')
+        cur2.execute('select e.pk_int_id_endereco, e.var_cep, es.var_estado, e.var_rua, e.var_cidade, e.var_complemento, e.int_num_casa, e.deletedat from tb_endereco e, tb_estado es where e.updatedAt = current_date-2 and fk_int_id_estado = pk_int_id_estado order by e.pk_int_id_endereco')
         enderecos2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -538,7 +538,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_usuario")
 
 
-        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where updatedat = current_date-1 order by pk_int_id_usuario')
+        cur2.execute('select pk_int_id_usuario, var_foto, var_email, var_senha, var_user_name, dt_nascimento, var_descricao_usuario, var_cpf, var_nome, deletedAt, fk_id_endereco from tb_usuario where updatedat = current_date-2 order by pk_int_id_usuario')
         usuarios2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -582,7 +582,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_venda_anuncio")
 
 
-        cur2.execute('select a.pk_int_id_venda_anuncio, a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, s.var_status_venda, a.deletedAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.updatedat = current_date-1 order by a.pk_int_id_venda_anuncio')
+        cur2.execute('select a.pk_int_id_venda_anuncio, a.var_nota_fiscal, a.dt_data, a.num_valor, a.var_produto, a.int_quantidade, s.var_status_venda, a.deletedAt, a.fk_int_id_usuario from tb_venda_anuncio a, tb_status_venda s where a.fk_int_id_status_venda = s.pk_int_id_status_venda and a.updatedat = current_date-2 order by a.pk_int_id_venda_anuncio')
         anuncios2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -627,7 +627,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_mascote")
 
 
-        cur2.execute('select pk_int_id_mascote, fk_int_id_cor_araci, fk_int_id_usuario, var_nome, deletedat from tb_mascote where updatedat = current_date-1 order by pk_int_id_mascote')
+        cur2.execute('select pk_int_id_mascote, fk_int_id_cor_araci, fk_int_id_usuario, var_nome, deletedat from tb_mascote where updatedat = current_date-2 order by pk_int_id_mascote')
         mascotes2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -671,7 +671,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_follow")
 
 
-        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedat from tb_follow where updatedat = current_date-1 order by pk_int_id_follow')
+        cur2.execute('select pk_int_id_follow, fk_int_id_seguidor, fk_int_id_seguido, deletedat from tb_follow where updatedat = current_date-2 order by pk_int_id_follow')
         follows2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -715,7 +715,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_ticket")
 
 
-        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where updatedat = current_date-1 order by pk_int_id_ticket')
+        cur2.execute('select pk_int_id_ticket, fk_int_id_usuario, fk_int_id_evento, int_quant, deletedat from tb_ticket where updatedat = current_date-2 order by pk_int_id_ticket')
         tickets2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
@@ -759,7 +759,7 @@ for amb in ambs:
         print(database2+"---->"+database1+" // Update tb_venda_evento")
 
 
-        cur2.execute('select pk_int_id_venda_evento, fk_int_id_barraca, fk_int_id_usuario, num_valor, deletedat from tb_venda_evento where updatedat = current_date-1 order by pk_int_id_venda_evento')
+        cur2.execute('select pk_int_id_venda_evento, fk_int_id_barraca, fk_int_id_usuario, num_valor, deletedat from tb_venda_evento where updatedat = current_date-2 order by pk_int_id_venda_evento')
         vendas_evento2 = cur2.fetchall()
 
         #Verificando se algum novo registro foi encontrado
