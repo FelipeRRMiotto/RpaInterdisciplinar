@@ -19,7 +19,7 @@ ontem = (datetime.now() - timedelta(1)).strftime('%Y-%m-%d')
 ontem_query = "current_date-1"
 
 #Criando e abrindo arquivo de log
-caminho = os.path.dirname(__file__)+"/.gitignore/logs/log_"+timestampa+".txt"
+caminho = os.path.dirname(__file__)+"/logs/log_"+timestampa+".txt"
 log = open(caminho,"x")
 
 #Criando função para escrever log1's
